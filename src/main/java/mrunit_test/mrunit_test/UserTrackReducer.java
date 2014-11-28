@@ -4,19 +4,13 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-public class UserTrackReducer extends
-		Reducer<Text, IntWritable, Text, IntWritable> {
+import com.google.common.collect.Sets;
+
+public class UserTrackReducer extends Reducer<Text, Text, Text, IntWritable> {
 
 	@Override
-	protected void reduce(Text key,
-						  Iterable<IntWritable> values,
-				          Context context)
-			            throws java.io.IOException, InterruptedException
-	{
-		int sum = 0;
-		for (IntWritable value : values) {
-			sum += value.get();
-		}
-		context.write(key, new IntWritable(sum));
+	protected void reduce(Text key, Iterable<Text> values, Context context)
+			throws java.io.IOException, InterruptedException {
+		context.write(key, new IntWritable(Sets.newHashSet(values).size()));
 	}
 }
