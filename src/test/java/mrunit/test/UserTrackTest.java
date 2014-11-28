@@ -1,4 +1,4 @@
-package mrunit_test.mrunit_test;
+package mrunit.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,6 +10,9 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import mrunit.test.UserTrackMapper;
+import mrunit.test.UserTrackReducer;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;

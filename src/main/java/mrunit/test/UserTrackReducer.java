@@ -1,4 +1,4 @@
-package mrunit_test.mrunit_test;
+package mrunit.test;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
