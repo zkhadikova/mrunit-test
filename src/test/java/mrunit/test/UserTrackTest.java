@@ -39,6 +39,7 @@ public class UserTrackTest {
 	public void setUp() {
 		Mapper<LongWritable, Text, Text, Text> mapper = new UserTrackMapper();
 		mapDriver = MapDriver.newMapDriver(mapper);
+		// test configuration
 		mapDriver.getConfiguration().set("ignored_track_id", "TrackId");
 
 		Reducer<Text, Text, Text, IntWritable> reducer = new UserTrackReducer();
@@ -78,8 +79,8 @@ public class UserTrackTest {
 
 		mapDriver.runTest();
 
-		assertEquals(3, mapDriver.getCounters().findCounter(UserTrackMapper.Track.PROCESSED).getValue());
-		assertEquals(1, mapDriver.getCounters().findCounter(UserTrackMapper.Track.IGNORED).getValue());
+		assertEquals(3, mapDriver.getCounters().findCounter(UserTrackMapper.TrackCounter.PROCESSED).getValue());
+		assertEquals(1, mapDriver.getCounters().findCounter(UserTrackMapper.TrackCounter.IGNORED).getValue());
 	}
 
 	@Test
@@ -87,7 +88,7 @@ public class UserTrackTest {
 		List<Text> values = new ArrayList<Text>();
 		values.add(new Text("a8ecf232f2ae422898fb0ae6b05e6dab"));
 		values.add(new Text("4f037421b4664bbb97d8efedb32336c0"));
-		values.add(new Text("4f037421b4664bbb97d8efedb32336c0"));
+		values.add(new Text("4f037421b4664bbb97d8efedb32336c0")); // duplicated record on purpose
 		reduceDriver
 				.withInput(new Text("415c6e3901989a4aa5d7b6934605b609"), values)
 				.withInput(
@@ -136,13 +137,16 @@ public class UserTrackTest {
 						new Text(
 								"{\"user_id\": \"415c6e3901989a4aa5d7b6934605b609\", \"cached\": \"\", \"timestamp\": \"20140924T20:00:00\", \"source_uri\": \"\", \"track_id\": \"4f037421b4664bbb97d8efedb32336c0\", \"source\": \"search\", \"length\": 255, \"version\": 2, \"device_type\": \"tablet\", \"offline_timestamp\": \"\", \"message\": \"APIStreamData\", \"os\": \"iOS\"}"));
 
-		mapReduceDriver.withOutput(new Text("415c6e3901989a4aa5d7b6934605b609"), new IntWritable(2))
+		// output sorted by key
+		mapReduceDriver
+				.withOutput(new Text("415c6e3901989a4aa5d7b6934605b609"), new IntWritable(2))
 				.withOutput(new Text("6726c2a9af7e6b7fbdb565c1a1911d58"), new IntWritable(2))
 				.withOutput(new Text("d40f5eb47b8cca0452fd74752762f3b5"), new IntWritable(1));
 
 		mapReduceDriver.runTest();
 	}
 
+	// Reads file and outputs result of map-reduce process as user_id: tracks_count
 	@Test
 	public void userTracksCount() throws IOException, JSONException, URISyntaxException {
 		InputStream is = getClass().getResourceAsStream("/streams_20140922_AD");
@@ -164,8 +168,8 @@ public class UserTrackTest {
 
 		System.out.printf("=====================\n");
 		System.out.println("records processed: "
-				+ mapReduceDriver.getCounters().findCounter(UserTrackMapper.Track.PROCESSED).getValue());
+				+ mapReduceDriver.getCounters().findCounter(UserTrackMapper.TrackCounter.PROCESSED).getValue());
 		System.out.println("records ignored: "
-				+ mapReduceDriver.getCounters().findCounter(UserTrackMapper.Track.IGNORED).getValue());
+				+ mapReduceDriver.getCounters().findCounter(UserTrackMapper.TrackCounter.IGNORED).getValue());
 	}
 }

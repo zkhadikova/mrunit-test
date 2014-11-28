@@ -1,6 +1,7 @@
 package mrunit.test;
 
 import java.io.IOException;
+import java.util.HashSet;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -12,6 +13,8 @@ public class UserTrackReducer extends Reducer<Text, Text, Text, IntWritable> {
 
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-		context.write(key, new IntWritable(Sets.newHashSet(values).size()));
+		//remove user's duplicated tracks
+		HashSet<Text> uniqueValues = Sets.newHashSet(values);
+		context.write(key, new IntWritable(uniqueValues.size()));
 	}
 }
