@@ -7,3 +7,4 @@ target/
 *.class
 *.java~
 *.txt~
+*.c~
