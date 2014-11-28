@@ -1,6 +1,13 @@
 package mrunit_test.mrunit_test;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import mrunit_test.mrunit_test.SMSCDRMapper.CDRCounter;
+
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -12,11 +19,7 @@ import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import com.google.common.collect.Lists;
 
 public class UserTrackTest {
 
@@ -26,8 +29,8 @@ public class UserTrackTest {
 
 	@Before
 	public void setUp() {
-		Mapper mapper = new UserTrackMapper();
-		Reducer reducer = new UserTrackReducer();
+		Mapper<LongWritable, Text, Text, IntWritable> mapper = new UserTrackMapper();
+		Reducer<Text, IntWritable, Text, IntWritable> reducer = new UserTrackReducer();
 		mapDriver = MapDriver.newMapDriver(mapper);
 		mapDriver.getConfiguration().set("delim", ";");
 		reduceDriver = ReduceDriver.newReduceDriver(reducer);
@@ -41,16 +44,15 @@ public class UserTrackTest {
 		mapDriver
 	    	.withInput(new LongWritable(1),
 		        	    new Text("{\"user_id\": \"415c6e3901989a4aa5d7b6934605b609\", \"cached\": \"\", \"timestamp\": \"20140922T19:15:00\", \"source_uri\": \"\", \"track_id\": \"a8ecf232f2ae422898fb0ae6b05e6dab\", \"source\": \"search\", \"length\": 288, \"version\": 2, \"device_type\": \"tablet\", \"offline_timestamp\": \"\", \"message\": \"APIStreamData\", \"os\": \"iOS\"}"))
-
 			.withInput(new LongWritable(1),
 	     			    new Text("{\"user_id\": \"415c6e3901989a4aa5d7b6934605b609\", \"cached\": \"\", \"timestamp\": \"20140922T20:00:00\", \"source_uri\": \"\", \"track_id\": \"4f037421b4664bbb97d8efedb32336c0\", \"source\": \"search\", \"length\": 255, \"version\": 2, \"device_type\": \"tablet\", \"offline_timestamp\": \"\", \"message\": \"APIStreamData\", \"os\": \"iOS\"}"));
-
 		// ignored record:  track_id="TrackId"
 		mapDriver.withInput(new LongWritable(1),
 						new Text("{\"user_id\": \"415c6e3901989a4aa5d7b6934605b609\", \"cached\": \"\", \"timestamp\": \"20140922T19:15:00\", \"source_uri\": \"\", \"track_id\": \"TrackId\", \"source\": \"search\", \"length\": 288, \"version\": 2, \"device_type\": \"tablet\", \"offline_timestamp\": \"\", \"message\": \"APIStreamData\", \"os\": \"iOS\"}"));
 
 		mapDriver.withOutput(new Text("415c6e3901989a4aa5d7b6934605b609"), new IntWritable(1));
 		mapDriver.withOutput(new Text("415c6e3901989a4aa5d7b6934605b609"), new IntWritable(1));
+		
 		mapDriver.runTest();
 		
 		assertEquals(2, mapDriver.getCounters().findCounter(UserTrackMapper.Track.PROCESSED).getValue());
@@ -62,30 +64,47 @@ public class UserTrackTest {
 		List<IntWritable> values = new ArrayList<IntWritable>();
 		values.add(new IntWritable(1));
 		values.add(new IntWritable(1));
-		reduceDriver.withInput(new Text("6"), values);
-		reduceDriver.withOutput(new Text("6"), new IntWritable(2));
+		reduceDriver
+				.withInput(new Text("415c6e3901989a4aa5d7b6934605b609"), values)
+				.withInput(new Text("d40f5eb47b8cca0452fd74752762f3b5"),
+						Lists.newArrayList(new IntWritable(1), new IntWritable(1)))
+				.withInput(new Text("6726c2a9af7e6b7fbdb565c1a1911d58"), Lists.newArrayList(new IntWritable(1)));
+
+		reduceDriver
+				.withOutput(new Text("415c6e3901989a4aa5d7b6934605b609"), new IntWritable(2))
+				.withOutput(new Text("d40f5eb47b8cca0452fd74752762f3b5"), new IntWritable(2))
+				.withOutput(new Text("6726c2a9af7e6b7fbdb565c1a1911d58"), new IntWritable(1));
+		
 		reduceDriver.runTest();
 	}
 
 	@Test
 	public void testMapReducer() throws IOException {
-		List<IntWritable> values = new ArrayList<IntWritable>();
-		values.add(new IntWritable(1));
-		values.add(new IntWritable(1));
+		mapReduceDriver.withInput(
+						new LongWritable(1),
+						new Text(
+								"{\"user_id\": \"6726c2a9af7e6b7fbdb565c1a1911d58\", \"cached\": \"\", \"timestamp\": \"20140923T19:15:00\", \"source_uri\": \"\", \"track_id\": \"a8ecf232f2ae422898fb0ae6b05e6dab\", \"source\": \"search\", \"length\": 288, \"version\": 2, \"device_type\": \"tablet\", \"offline_timestamp\": \"\", \"message\": \"APIStreamData\", \"os\": \"iOS\"}"))
+				.withInput(
+						new LongWritable(1),
+						new Text(
+								"{\"user_id\": \"d40f5eb47b8cca0452fd74752762f3b5\", \"cached\": \"\", \"timestamp\": \"20140922T19:15:00\", \"source_uri\": \"\", \"track_id\": \"f83d3a3b5cd849acb25a1e41951ec9a8\", \"source\": \"search\", \"length\": 288, \"version\": 2, \"device_type\": \"tablet\", \"offline_timestamp\": \"\", \"message\": \"APIStreamData\", \"os\": \"iOS\"}"))
+				.withInput(
+						new LongWritable(1),
+						new Text(
+								"{\"user_id\": \"415c6e3901989a4aa5d7b6934605b609\", \"cached\": \"\", \"timestamp\": \"20140922T19:15:00\", \"source_uri\": \"\", \"track_id\": \"bc6700d62ff04dc5a750f994c9f9f062\", \"source\": \"search\", \"length\": 288, \"version\": 2, \"device_type\": \"tablet\", \"offline_timestamp\": \"\", \"message\": \"APIStreamData\", \"os\": \"iOS\"}"))
+				.withInput(
+						new LongWritable(1),
+						new Text(
+								"{\"user_id\": \"6726c2a9af7e6b7fbdb565c1a1911d58\", \"cached\": \"\", \"timestamp\": \"20140923T19:15:00\", \"source_uri\": \"\", \"track_id\": \"ac6f626bae894cc986cacfde397fc958\", \"source\": \"search\", \"length\": 288, \"version\": 2, \"device_type\": \"tablet\", \"offline_timestamp\": \"\", \"message\": \"APIStreamData\", \"os\": \"iOS\"}"))
+				.withInput(
+						new LongWritable(1),
+						new Text(
+								"{\"user_id\": \"415c6e3901989a4aa5d7b6934605b609\", \"cached\": \"\", \"timestamp\": \"20140924T20:00:00\", \"source_uri\": \"\", \"track_id\": \"4f037421b4664bbb97d8efedb32336c0\", \"source\": \"search\", \"length\": 255, \"version\": 2, \"device_type\": \"tablet\", \"offline_timestamp\": \"\", \"message\": \"APIStreamData\", \"os\": \"iOS\"}"));
+
 		mapReduceDriver
-				.withInput(new LongWritable(),
-						new Text("655209;1;796764372490213;804422938115889;6"))
-				.withInput(new LongWritable(2),
-						new Text("848232;1;893239399454843;434323435533244;3"))
-				.withInput(new LongWritable(3),
-						new Text("323234;1;343438438443;323723734544545;3"))
-				.withInput(new LongWritable(4),
-						new Text("323234;0;343438438443;323723734544545;3"));
-		
-		mapReduceDriver.withOutput(new Text("3"), new IntWritable(2))
-				.withOutput(new Text("6"), new IntWritable(1));
-		
-		mapReduceDriver.withCounter(CDRCounter.NonSMSCDR, 1);
+				.withOutput(new Text("415c6e3901989a4aa5d7b6934605b609"), new IntWritable(2))
+				.withOutput(new Text("6726c2a9af7e6b7fbdb565c1a1911d58"), new IntWritable(2))
+				.withOutput(new Text("d40f5eb47b8cca0452fd74752762f3b5"), new IntWritable(1));
 		
 		mapReduceDriver.runTest();
 	}
