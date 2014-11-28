@@ -1,7 +1,7 @@
 package mrunit_test.mrunit_test;
 
 //import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+//import java.util.stream.StreamSupport;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;

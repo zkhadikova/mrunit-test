@@ -102,7 +102,6 @@ public class SomeMapperReducerTest {
 		List<IntWritable> values = new ArrayList<IntWritable>();
 		values.add(new IntWritable(1));
 		values.add(new IntWritable(1));
-		Sca
 		mapReduceDriver
 				.withInput(new LongWritable(1),
 						new Text("Ana;depeche_mode;ramstien;korn;rhcp"))
