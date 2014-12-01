@@ -29,8 +29,8 @@ To generate html report of test result run:
 
 # Problems with MR Unit
 
--Lacking documentation.
--Tests are not executed in distributed way.
+- Lacking documentation.
+- Tests are not executed in distributed way.
 	
 # Links
 
