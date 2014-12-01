@@ -8,9 +8,9 @@
 
 To run project tests run:
 
-  mvn clean test
+    mvn clean test
 
 To generate html report of test result run:
 
-  mvn clean surefire-report:report 
+    mvn clean surefire-report:report
 
