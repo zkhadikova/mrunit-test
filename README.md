@@ -23,9 +23,9 @@ To generate html report of test result run:
 	
 # Benefits of using MR Unit
 
--Faster testing (no I/O required).
--No input/output files required(everything can be programatically specified).
--Less test harness code.
+- Faster testing (no I/O required).
+- No input/output files required(everything can be programatically specified).
+- Less test harness code.
 
 # Problems with MR Unit
 
