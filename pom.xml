@@ -18,6 +18,7 @@
 		<mockitoVersion>1.9.5</mockitoVersion>
 		<mrUnitVersion>1.1.0</mrUnitVersion>
 		<jacksonVersion>1.9.13</jacksonVersion>
+		<surefireVersion>2.6</surefireVersion>
 	</properties>
 
 	<dependencies>
@@ -77,4 +78,16 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>${surefireVersion}</version>
+				<configuration>
+					<outputName>MRUnit Test Report</outputName>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>
