@@ -16,10 +16,10 @@ To generate html report of test result run:
 
 # MR Unit features
 
--Test Map and Reduce separately.
--Test Map-Reduce job altogether.
--Test series of Map-Reduce jobs.
--Test counters.
+- Test Map and Reduce separately.
+- Test Map-Reduce job altogether.
+- Test series of Map-Reduce jobs.
+- Test counters.
 	
 # Benefits of using MR Unit
 
