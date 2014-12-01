@@ -14,3 +14,13 @@ To generate html report of test result run:
 
     mvn clean surefire-report:report
 
+# Links
+
+MR Unit:
+https://mrunit.apache.org/ 
+
+Javadoc
+https://mrunit.apache.org/documentation/javadocs/1.1.0/index.html 
+
+MRUnit Tutorial
+https://cwiki.apache.org/confluence/display/MRUNIT/MRUnit+Tutorial
