@@ -1,19 +1,6 @@
 package mrunit.test;
 
-import static org.junit.Assert.*;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
-import mrunit.test.UserTrackMapper;
-import mrunit.test.UserTrackReducer;
-
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -24,12 +11,29 @@ import org.apache.hadoop.mrunit.mapreduce.MapReduceDriver;
 import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class UserTrackTest {
+
+	public static final String IGNORED_TRACK_ID_VALUE = "TrackId";
 
 	MapDriver<LongWritable, Text, Text, Text> mapDriver;
 	ReduceDriver<Text, Text, Text, IntWritable> reduceDriver;
@@ -40,7 +44,7 @@ public class UserTrackTest {
 		Mapper<LongWritable, Text, Text, Text> mapper = new UserTrackMapper();
 		mapDriver = MapDriver.newMapDriver(mapper);
 		// test configuration
-		mapDriver.getConfiguration().set("ignored_track_id", "TrackId");
+		mapDriver.getConfiguration().set("ignored_track_id", IGNORED_TRACK_ID_VALUE);
 
 		Reducer<Text, Text, Text, IntWritable> reducer = new UserTrackReducer();
 		reduceDriver = ReduceDriver.newReduceDriver(reducer);
@@ -146,14 +150,22 @@ public class UserTrackTest {
 		mapReduceDriver.runTest();
 	}
 
-	// Reads file and outputs result of map-reduce process as user_id: tracks_count
+	/**
+	 *	Check {@linkplain UserTrackMapper} and {@linkplain UserTrackReducer} implementations
+	 *	against test file `resources/streams_20140922_AD` .
+	 */
 	@Test
-	public void userTracksCount() throws IOException, JSONException, URISyntaxException {
+	public void userTracksCount_streams_20140922_AD() throws IOException, JSONException, URISyntaxException {
+		//      user_id, user tracks
+		HashMap<String, Collection<String>> userStat = new HashMap<>();
+
 		InputStream is = getClass().getResourceAsStream("/streams_20140922_AD");
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
 			String line = null;
 			while ((line = br.readLine()) != null) {
 				mapReduceDriver.withInput(new LongWritable(1), new Text(line));
+				JSONObject rec = new JSONObject(line);
+        		updateStat(userStat, rec);
 			}
 		}
 
@@ -164,6 +176,16 @@ public class UserTrackTest {
 		System.out.printf("=====================\n");
 		for (Pair<Text, IntWritable> pair : pairs) {
 			System.out.printf("%s: %s\n", pair.getFirst(), pair.getSecond());
+			String userId = new String(pair.getFirst().getBytes(), Charset.defaultCharset());
+			int tracksCount = pair.getSecond().get();
+			int expectedTracksCount = userStat.get(userId).size();
+			userStat.remove(userId);
+			assertEquals(expectedTracksCount, tracksCount);
+		}
+
+		if (!userStat.isEmpty()) {
+			System.out.println("\nuserStat: " + userStat);
+			assertTrue("There should be no extra records", false);
 		}
 
 		System.out.printf("=====================\n");
@@ -171,5 +193,22 @@ public class UserTrackTest {
 				+ mapReduceDriver.getCounters().findCounter(UserTrackMapper.TrackCounter.PROCESSED).getValue());
 		System.out.println("records ignored: "
 				+ mapReduceDriver.getCounters().findCounter(UserTrackMapper.TrackCounter.IGNORED).getValue());
+	}
+
+	private void updateStat(HashMap<String, Collection<String>> stat, JSONObject rec) throws JSONException {
+		// do not count records with ignored track_id value
+		if (IGNORED_TRACK_ID_VALUE.equalsIgnoreCase(rec.getString("track_id"))) {
+			return;
+		}
+
+		String userId = rec.getString("user_id");
+		String track = rec.getString("track_id");
+		Collection<String> tracks = stat.get(userId);
+		if (tracks == null) {
+			tracks = new HashSet<>(); // using set, because we do not count duplicated records
+			stat.put(userId, tracks);
+		}
+
+        tracks.add(track);
 	}
 }
