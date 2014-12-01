@@ -4,3 +4,7 @@
 target/
 *.iml
 /bin/
+*.class
+*.java~
+*.txt~
+*.c~
