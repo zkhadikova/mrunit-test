@@ -14,6 +14,24 @@ To generate html report of test result run:
 
     mvn clean surefire-report:report
 
+# MR Unit features
+
+-Test Map and Reduce separately.
+-Test Map-Reduce job altogether.
+-Test series of Map-Reduce jobs.
+-Test counters.
+	
+# Benefits of using MR Unit
+
+-Faster testing (no I/O required).
+-No input/output files required(everything can be programatically specified).
+-Less test harness code.
+
+# Problems with MR Unit
+
+-Lacking documentation.
+-Tests are not executed in distributed way.
+	
 # Links
 
 MR Unit:
