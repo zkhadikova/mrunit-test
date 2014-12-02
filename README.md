@@ -6,11 +6,13 @@
 
 # Usage
 
-To run project tests run:
+##To run project tests run:
 
     mvn clean test
 
-To generate html report of test result run:
+##To generate html report of test result run:
 
-    mvn clean surefire-report:report
+    mvn clean surefire-report:report site -DgenerateReports=false
+
+The generated report location: target/site/surefire-report.html
 
