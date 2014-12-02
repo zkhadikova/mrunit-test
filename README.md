@@ -16,3 +16,31 @@
 
 The generated report location: target/site/surefire-report.html
 
+# MR Unit features
+
+- Test Map and Reduce separately.
+- Test Map-Reduce job altogether.
+- Test series of Map-Reduce jobs.
+- Test counters.
+	
+# Benefits of using MR Unit
+
+- Faster testing (no I/O required).
+- No input/output files required(everything can be programatically specified).
+- Less test harness code.
+
+# Problems with MR Unit
+
+- Lacking documentation.
+- Tests are not executed in distributed way.
+	
+# Links
+
+MR Unit:
+https://mrunit.apache.org/ 
+
+Javadoc
+https://mrunit.apache.org/documentation/javadocs/1.1.0/index.html 
+
+MRUnit Tutorial
+https://cwiki.apache.org/confluence/display/MRUNIT/MRUnit+Tutorial
